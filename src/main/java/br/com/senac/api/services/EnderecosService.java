@@ -1,16 +1,24 @@
 package br.com.senac.api.services;
 
 import br.com.senac.api.controllers.dtos.EnderecosRequestDTO;
+import br.com.senac.api.modelos.Clientes;
 import br.com.senac.api.modelos.Enderecos;
+import br.com.senac.api.repositorios.ClientesRepositorio;
 import br.com.senac.api.repositorios.EnderecosRepositorio;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EnderecosService {
 
+    @Autowired
     private EnderecosRepositorio enderecosRepositorio;
+
+    @Autowired
+    private ClientesRepositorio clientesRepositorio;
 
     public List<Enderecos> listarTodos() {
         return enderecosRepositorio.findAll();
@@ -25,6 +33,13 @@ public class EnderecosService {
         enderecoPersist.setRua(enderecoPersist.getRua());
         enderecoPersist.setComplemento(enderecoPersist.getComplemento());
         enderecoPersist.setUf(endereco.getUf());
+
+        Optional<Clientes> clientesResult = clientesRepositorio.findById(endereco.getClienteId());
+        if(clientesResult.isEmpty()) {
+            throw new RuntimeException("cliente não encontrado");
+        }
+
+        enderecoPersist.setCliente(clientesResult.get());
 
         return enderecosRepositorio.save(enderecoPersist);
     }
